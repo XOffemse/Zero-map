@@ -5,14 +5,14 @@ import threading
 from flask import Flask, request, jsonify, send_from_directory
 from adapter_utils import get_adapters
 from adapter_utils.wifi_scanner import scan_wifi_networks  # Import your scanner function
-from adapter_utils.monitor_mode_api import MonitorModeAPI
+from adapter_utils.linux.monitor_mode_api import MonitorModeAPI
 
 # === Flask Setup ===
 app = Flask(__name__, static_folder='ui')
 
 # Ensure auth.json is stored relative to this script's folder
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-CREDENTIALS_FILE = os.path.join(BASE_DIR, 'auth.json')
+CREDENTIALS_FILE = os.path.join(BASE_DIR, 'config/auth.json')
 
 # Create monitor mode API instance
 monitor_mode_api = MonitorModeAPI()
@@ -65,17 +65,23 @@ class API:
 def root():
     """Serve the initial page based on setup state"""
     if not os.path.exists(CREDENTIALS_FILE):
-        return send_from_directory('ui', 'setup.html')
-    return send_from_directory('ui', 'login.html')
+        return send_from_directory('ui/auth', 'setup.html')
+    return send_from_directory('ui/auth', 'login.html')
 
 @app.route('/dashboard')
 def dashboard():
-    return send_from_directory('ui', 'dashboard.html')
+    return send_from_directory('ui', 'index.html')
 
 @app.route('/set-credentials', methods=['POST'])
 def set_credentials():
     """Save user credentials"""
     data = request.json
+
+    # Ensure the config directory exists
+    config_dir = os.path.dirname(CREDENTIALS_FILE)
+    if not os.path.exists(config_dir):
+        os.makedirs(config_dir, exist_ok=True)
+
     with open(CREDENTIALS_FILE, 'w') as f:
         json.dump(data, f)
     return jsonify({"status": "saved"})

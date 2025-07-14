@@ -1,0 +1,34 @@
+# Ignore Python virtual environment folders
+venv/
+env/
+.venv/
+.env/
+
+# Ignore Python bytecode cache folders
+__pycache__/
+*.py[cod]
+
+# Ignore JSON files (e.g., auth.json)
+*.json
+
+# Ignore editor and OS-specific files
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Ignore log files
+*.log
+
+# Ignore Python egg metadata
+*.egg-info/
+.eggs/
+
+# Ignore coverage reports
+htmlcov/
+.coverage
+.coverage.*
+
+# Ignore build/dist folders
+build/
+dist/
