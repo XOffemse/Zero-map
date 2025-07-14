@@ -1,6 +1,6 @@
 # ⚡ Zero-map
 
-**Zero-map** is a Wi-Fi radar and attack GUI tool for Linux systems.  
+**Zero-Map** is a Wi-Fi radar and attack GUI tool for Linux systems.  
 It provides an intuitive interface to monitor nearby wireless networks, visualize their properties, and — in future updates — perform advanced operations such as deauthentication attacks.
 
 Designed for penetration testers, network security researchers, and wireless enthusiasts, Zero-map enables seamless scanning, analysis, and interaction with Wi-Fi networks.
@@ -44,30 +44,20 @@ git clone https://github.com/XOffemse/Zero-map.git
 ```
 cd Zero-map
 ```
-### Step 2: Create and Activate a Virtual Environment
+### Step 2: Run the installer
 
 ```
-python3 -m venv ./venv
-```
-
-```
-source venv/bin/activate
-```
-
-### Step 3: Install Python Dependencies
-
-Run these commands one by one inside the virtual environment:
-
-```
-pip3 install pyqt5 pyqtwebengine
+chmod a+x install.sh
 ```
 
 ```
-pip3 install pywebview
+sudo ./install.sh
 ```
 
+### Step 3: Activate the newly created Virtual Enviroment
+
 ```
-pip3 install pywebview[qt]
+source /bin/activate
 ```
 
 ### Step 4: Run the Application
@@ -76,7 +66,7 @@ pip3 install pywebview[qt]
 python3 main.py
 ```
 
----
+
 
 ## ⚠️ Disclaimer
 
