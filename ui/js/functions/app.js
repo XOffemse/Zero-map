@@ -1,3 +1,4 @@
+// adapterMap.js
 
 // ================================
 // Global Variables
@@ -6,9 +7,6 @@ let adapters = [];
 let selectedAdapter = null;
 let map = null;
 let circle = null;
-let nearbyMarkers = []; // Track nearby network markers
-let selectedWifiNetwork = null;
-
 
 // ================================
 // Utility Functions
@@ -50,8 +48,6 @@ async function init() {
     document.getElementById('parse-gmap-link-btn').addEventListener('click', () => {
         parseGoogleMapsLink().catch(console.error);
     });
-    const scanBtn = document.getElementById('scan-nearby-btn');
-    if (scanBtn) scanBtn.addEventListener('click', scanNearbyWifi);
 
     await loadAdapters();
     initMap();
@@ -87,7 +83,7 @@ function renderAdaptersList() {
     const adaptersDiv = document.getElementById('adapters');
     adaptersDiv.innerHTML = '';
     if (!adapters.length) {
-        adaptersDiv.innerHTML = "<p>No Wi-Fi adapters found.</p>";
+        adaptersDiv.innerHTML = "<p>No adapters found.</p>";
         return;
     }
 
@@ -152,7 +148,7 @@ function updateAdapterInfo(adapter, lat = null, lon = null, accuracy = null) {
     infoDiv.innerHTML = `
         <b>Name:</b> ${adapter.name} <br/>
         <b>SSID:</b> ${adapter.ssid || 'Not connected'} <br/>
-        <b>Signal:</b> ${adapter.signal}% <br/>
+        <b>Signal:</b> ${adapter.signal || 'N/A'}% <br/>
         <b>MAC:</b> ${adapter.mac} <br/>
         ${locationHtml}
     `;
@@ -181,7 +177,7 @@ function updateMapAndInfo(lat, lon, accuracy = null) {
 
     if (circle) circle.setMap(null);
 
-    const radius = Math.min(calculateRadiusFromSignal(selectedAdapter.signal), 50);
+    const radius = Math.min(calculateRadiusFromSignal(selectedAdapter?.signal), 50);
     circle = new google.maps.Circle({
         strokeColor: '#3f51b5',
         strokeOpacity: 0.8,
@@ -201,7 +197,7 @@ function updateMapAndInfo(lat, lon, accuracy = null) {
 // ================================
 function refreshLocation() {
     if (!selectedAdapter) {
-        alert("Please select a Wi-Fi adapter first.");
+        alert("Please select an adapter first.");
         return;
     }
     const lat = document.getElementById('latitude').value.trim();
@@ -215,7 +211,7 @@ function refreshLocation() {
 
 function searchLocation() {
     if (!selectedAdapter) {
-        alert("Please select a Wi-Fi adapter.");
+        alert("Please select an adapter.");
         return;
     }
 
@@ -229,20 +225,19 @@ function searchLocation() {
 
     updateMapAndInfo(lat, lon, null);
 }
+
 async function useMyLocation() {
     if (!selectedAdapter) {
-        alert("Please select a Wi-Fi adapter first.");
+        alert("Please select an adapter first.");
         return;
     }
 
     setUseLocationButtonState(false);
 
     try {
-        // Check if running inside PyWebView Chromium
         const isPywebview = !!window.pywebview;
 
         if (isPywebview && navigator.userAgent.includes("Chrome")) {
-            // Force prompt Chromium to ask location permission
             const permission = await navigator.permissions.query({ name: 'geolocation' });
             if (permission.state === 'denied') {
                 alert("Location permission is blocked. Please allow location access in Chromium settings.");
@@ -336,171 +331,6 @@ function updateFromCoords(lat, lon) {
     setRefreshLocationButtonState(true);
 }
 
-// ================================
-// Scan Nearby Wi-Fi
-// ================================
-async function scanNearbyWifi() {
-    const scanBtn = document.getElementById('scan-nearby-btn');
-
-    if (!scanBtn) {
-        console.error("Scan Nearby button not found.");
-        return;
-    }
-
-    // Disable button and change text
-    scanBtn.disabled = true;
-    scanBtn.textContent = "Scanning...";
-
-    try {
-        const wifiJson = await safeApiCall('scanNearbyNetworks');
-        const networks = JSON.parse(wifiJson);
-
-        // Clear previous markers
-        nearbyMarkers.forEach(marker => marker.setMap(null));
-        nearbyMarkers = [];
-
-        if (!networks.length) {
-            alert('No nearby Wi-Fi networks found.');
-        } else {
-            // Optionally, you can add markers on the map here
-            // (adjust lat/lon offsets or use a fixed location if needed)
-        }
-
-        // Update the Wi-Fi scans list immediately after scanning
-        await refreshWifiScans();
-
-        // Optionally switch to Wi-Fi Scans screen (if using mode buttons)
-        document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
-        const scansBtn = document.querySelector('.mode-btn[data-mode="wifi-scans"]');
-        if (scansBtn) scansBtn.classList.add('active');
-
-        document.querySelectorAll('.mode-screen').forEach(screen => {
-            screen.style.display = 'none';
-        });
-        const scansScreen = document.getElementById('wifi-scans-screen');
-        if (scansScreen) scansScreen.style.display = 'block';
-
-    } catch (error) {
-        alert("Failed to scan nearby networks.");
-        console.error(error);
-    } finally {
-        // Re-enable button and reset text after operation completes
-        scanBtn.disabled = false;
-        scanBtn.textContent = "Scan Nearby Wi-Fi";
-    }
-}
-
-
-
-async function refreshWifiScans() {
-    const listEl = document.getElementById('wifi-networks-list');
-    listEl.innerHTML = '<li>Scanning for Wi-Fi networks...</li>';
-
-    // Reset selection and disable the select button at the start
-    selectedWifiNetwork = null;
-    const selectBtn = document.getElementById('select-wifi-btn');
-    if (selectBtn) selectBtn.disabled = true;
-
-    try {
-        const wifiJson = await safeApiCall('scanNearbyNetworks');
-        const networks = JSON.parse(wifiJson);
-
-        if (!networks.length) {
-            listEl.innerHTML = '<li>No Wi-Fi networks found.</li>';
-            return;
-        }
-
-        // Clear the list
-        listEl.innerHTML = '';
-
-        networks.forEach(net => {
-            const li = document.createElement('li');
-            li.style.padding = '8px 5px';
-            li.style.borderBottom = '1px solid #444';
-            li.tabIndex = 0;             // Make focusable
-            li.role = 'option';          // Accessibility role
-            li.classList.remove('selected'); // Reset any selection style
-
-            // Build network info string
-            const ssid = net.ssid || "<i>Hidden SSID</i>";
-            const bssid = net.bssid || "N/A";
-            const signal = net.signal !== undefined ? net.signal + "%" : "N/A";
-            const freq = net.freq || "N/A";
-            const auth = net.auth || "N/A";
-
-            li.innerHTML = `<strong>SSID:</strong> ${ssid}<br/>
-                      <strong>BSSID:</strong> ${bssid}<br/>
-                      <strong>Signal:</strong> ${signal}<br/>
-                      <strong>Frequency:</strong> ${freq} MHz<br/>
-                      <strong>Auth:</strong> ${auth}`;
-
-            // Selection handler
-            li.addEventListener('click', () => {
-                if (selectedWifiNetwork) {
-                    selectedWifiNetwork.classList.remove('selected');
-                }
-                selectedWifiNetwork = li;
-                li.classList.add('selected');
-
-                // Enable Select Network button
-                if (selectBtn) selectBtn.disabled = false;
-            });
-
-
-            // Keyboard accessibility: select on Enter or Space
-            li.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    li.click();
-                }
-            });
-
-            listEl.appendChild(li);
-        });
-    } catch (error) {
-        listEl.innerHTML = '<li>Error scanning networks.</li>';
-        console.error("Wi-Fi scan error:", error);
-    }
-}
-
-document.getElementById('select-wifi-btn').addEventListener('click', () => {
-    if (!selectedWifiNetwork) {
-        alert("Please select a Wi-Fi network first.");
-        return;
-    }
-
-    // Extract info from the selected li element (you might want to parse it properly)
-    const attackInfo = selectedWifiNetwork.innerText || selectedWifiNetwork.textContent;
-
-    // Save or pass this info to your attacks screen or backend as needed
-    // For now, just log or display in attacks panel:
-    const attacksScreenSection = document.querySelector('#attacks-screen section');
-    if (attacksScreenSection) {
-        attacksScreenSection.innerHTML = `
-            <h2>Attacks Panel</h2>
-            <p>Selected Wi-Fi Network Info:</p>
-            <pre style="white-space: pre-wrap;">${attackInfo}</pre>
-            <button>Run Attack</button>
-            <button>Stop Attack</button>
-        `;
-    }
-
-    // Switch mode buttons active state
-    document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
-    const attacksBtn = document.querySelector('.mode-btn[data-mode="attacks"]');
-    if (attacksBtn) attacksBtn.classList.add('active');
-
-    // Show attacks screen and hide others
-    document.querySelectorAll('.mode-screen').forEach(screen => (screen.style.display = 'none'));
-    const attacksScreen = document.getElementById('attacks-screen');
-    if (attacksScreen) attacksScreen.style.display = 'block';
-});
-
-// Attach event listener to refresh button
-document.getElementById('refresh-wifi-scans-btn').addEventListener('click', refreshWifiScans);
-
-// Optionally, refresh on screen show
-document.getElementById('refresh-wifi-scans-btn').addEventListener('click', refreshWifiScans);
 // ================================
 // UI Helpers
 // ================================

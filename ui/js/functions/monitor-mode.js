@@ -74,11 +74,23 @@ function updateStopMonitorState() {
 }
 
 // ================================
+// Environment Helper
+// ================================
+function isWindowsOS() {
+    return navigator.userAgent.includes('Windows');
+}
+
+// ================================
 // Modal Event Bindings
 // ================================
 
-// Open modal and fetch fresh adapters
+// Open modal and fetch fresh adapters only on supported OS
 monitorModeBtn.addEventListener('click', async () => {
+    if (isWindowsOS()) {
+        alert('Sorry, this environment or OS does not support this action.');
+        return;
+    }
+
     resetModal();
     monitorModeModal.style.display = 'block';
     await refreshModalAdapters();
