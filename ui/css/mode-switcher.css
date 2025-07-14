@@ -1,0 +1,115 @@
+/* ============================================
+   Mode Switcher Styles
+============================================ */
+
+/* Screens in right-side: hide inactive ones */
+#right-side .mode-screen {
+  display: none; /* Hide all screens by default */
+}
+
+#right-side .mode-screen.active {
+  display: block; /* Show the active screen */
+}
+
+/* ============================================
+   Layout: Vertical Divider
+============================================ */
+
+#vertical-divider {
+  position: fixed;
+  top: 0;
+  left: 60px; /* divider position */
+  width: 2px;
+  height: 100vh;
+  background-color: #222;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.6);
+  z-index: 1000; /* Between toggle button and background section */
+}
+
+/* ============================================
+   Attack Menu Left Section
+============================================ */
+
+#attack-menu-left-section {
+  position: fixed;
+  top: 0;
+  left: 66px; /* 60px + 2px divider width + 4px gap */
+  bottom: 0;
+  width: 255px; /* adjusted width to maintain overall layout */
+  padding: 20px 12px;
+  background: #0a0a0a; /* FBI login background */
+  border-right: 1px solid #222;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  box-sizing: border-box;
+  user-select: none;
+  font-family: 'Source Code Pro', monospace;
+  color: #e6e6e6;
+  z-index: 5; /* below sidebar (z-index:1500) */
+}
+
+#attack-menu-left-section .background-content {
+  flex-grow: 1;
+}
+
+#attack-menu-left-section h2 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font: 900 1.1rem 'Source Code Pro', monospace;
+  color: #ccc;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid #333;
+  padding-bottom: 10px;
+  text-align: center;
+}
+
+#attack-menu-left-section p {
+  font-weight: 600;
+  color: #999;
+  margin-bottom: 20px;
+  line-height: 1.4;
+}
+
+/* ============================================
+   Buttons inside Attack Menu Left Section
+============================================ */
+
+#attack-menu-left-section button {
+  width: 100%;
+  padding: 10px 24px;
+  font-weight: bold;
+  font-size: 0.9rem;
+  border-radius: 8px;
+  background-color: #111;
+  color: #fff;
+  border: 1px solid #333;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-sizing: border-box;
+  font-family: 'Source Code Pro', monospace;
+  letter-spacing: 2px;
+  margin-bottom: 12px;
+}
+
+#attack-menu-left-section button:hover:not(:disabled) {
+  background-color: #1d1d1d;
+}
+
+#attack-menu-left-section button:active:not(:disabled) {
+  background-color: #0b0b0b;
+}
+
+#attack-menu-left-section button:disabled {
+  background-color: #1b1b1b;
+  color: #7a8a96;
+  cursor: not-allowed;
+  box-shadow: none;
+}

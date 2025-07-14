@@ -1,0 +1,219 @@
+
+#right-side {
+  flex: 1 1 50%;
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* Fill parent without overshooting */
+  min-height: 0; /* Prevent flex overflow */
+  padding: 14px 30px 40px;
+  box-sizing: border-box;
+  background-color: #0a0a0a;
+  color: #e6e6e6;
+  font-family: 'Source Code Pro', monospace;
+  user-select: none;
+  overflow: hidden; /* Prevent scrolling */
+}
+
+
+/* Manual Location Input Section */
+#manual-location-container {
+  background-color: #111;
+  padding: 10px 20px;
+  border-radius: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+  margin-bottom: 20px;
+}
+
+/* Labels */
+#manual-location-container label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #aaa;
+  min-width: 60px;
+  user-select: text;
+}
+
+/* Inputs */
+#manual-location-container input[type="number"],
+#manual-location-container input#gmap-link {
+  flex: 1 1 120px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #333;
+  background-color: #151515;
+  color: #e6e6e6;
+  font-size: 0.9rem;
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+}
+
+#manual-location-container input[type="number"]:focus,
+#manual-location-container input#gmap-link:focus {
+  outline: none;
+  border-color: #555;
+  background-color: #1d1d1d;
+}
+
+/* Search Button */
+#search-location-btn {
+  flex: none;
+  padding: 10px 24px;
+  font-weight: bold;
+  font-size: 0.9rem;
+  border-radius: 8px;
+  background-color: #111;
+  color: #fff;
+  border: 1px solid #333;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease;
+  min-width: 140px;
+  font-family: 'Source Code Pro', monospace;
+  letter-spacing: 1px;
+}
+
+#search-location-btn:hover:not(:disabled) {
+  background-color: #1d1d1d;
+}
+
+#search-location-btn:disabled {
+  background-color: #1b1b1b;
+  color: #7a8a96;
+  cursor: not-allowed;
+}
+
+/* Extract from Link Button */
+#parse-gmap-link-btn {
+  flex: none;
+  padding: 10px 20px;
+  font-weight: bold;
+  font-size: 0.9rem;
+  border-radius: 8px;
+  background-color: #111;
+  color: #fff;
+  border: 1px solid #333;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease;
+  min-width: 140px;
+  font-family: 'Source Code Pro', monospace;
+  letter-spacing: 1px;
+}
+
+#parse-gmap-link-btn:hover:not(:disabled) {
+  background-color: #1d1d1d;
+}
+
+#parse-gmap-link-btn:disabled {
+  background-color: #1b1b1b;
+  color: #7a8a96;
+  cursor: not-allowed;
+}
+
+/* Location Controls Section */
+#location-controls {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+/* Buttons in Location Controls */
+#location-controls button {
+  flex: 1;
+  padding: 10px 0;
+  font-weight: bold;
+  font-size: 0.9rem;
+  border-radius: 8px;
+  background-color: #111;
+  color: #fff;
+  border: 1px solid #333;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 140px;
+  font-family: 'Source Code Pro', monospace;
+  letter-spacing: 1px;
+}
+
+#location-controls button:hover:not(:disabled) {
+  background-color: #1d1d1d;
+}
+
+#location-controls button:disabled {
+  background-color: #1b1b1b;
+  color: #7a8a96;
+  cursor: not-allowed;
+}
+
+/* Icon in Buttons */
+#location-controls button svg.icon-refresh {
+  width: 16px;
+  height: 16px;
+  fill: #ffffff;
+  flex-shrink: 0;
+}
+
+/* Spinner (if any) */
+#location-controls .spinner {
+  width: 14px;
+  height: 14px;
+  border: 2.5px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-left: 6px;
+  flex-shrink: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease;
+}
+
+#location-controls button.loading .spinner {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Map Container */
+#map {
+  flex: 1 1 auto;
+  border-radius: 12px;
+  box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.6);
+  border: 1px solid #222;
+  min-height: 0;
+
+}
+
+/* Spinner General Use */
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2.5px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+  margin-left: 8px;
+  display: none;
+}
+
+button.loading .spinner {
+  display: inline-block;
+}
+
+/* Refresh Icon */
+.icon-refresh {
+  width: 18px;
+  height: 18px;
+  fill: white;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

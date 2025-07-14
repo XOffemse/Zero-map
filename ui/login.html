@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Zero-Map</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap');
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      background-color: #000;
+      font-family: 'Source Code Pro', monospace;
+      color: #e6e6e6;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .login-box {
+      background-color: #0a0a0a;
+      border: 1px solid #222;
+      padding: 40px;
+      width: 340px;
+      position: relative;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+    }
+
+    .header {
+      text-align: center;
+      font-size: 1.7rem;
+      font-weight: bold;
+      letter-spacing: 5px;
+      margin-bottom: 25px;
+      color: #ccc;
+      border-bottom: 1px solid #333;
+      padding-bottom: 10px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      font-size: 0.85rem;
+      margin-bottom: 5px;
+      letter-spacing: 1px;
+      color: #777;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      padding: 10px 12px;
+      margin-bottom: 20px;
+      border: 1px solid #333;
+      background-color: #111;
+      color: #e6e6e6;
+      font-size: 1rem;
+      font-family: 'Source Code Pro', monospace;
+      border-radius: 2px;
+      outline: none;
+    }
+
+    input[type="text"]:focus,
+    input[type="password"]:focus {
+      border-color: #555;
+      background-color: #151515;
+    }
+
+    button {
+      padding: 12px;
+      background-color: #111;
+      border: 1px solid #333;
+      color: #fff;
+      font-weight: bold;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      position: relative;
+    }
+
+    button:hover {
+      background-color: #1d1d1d;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .spinner {
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-left-color: white;
+      border-radius: 50%;
+      width: 16px;
+      height: 16px;
+      animation: spin 0.8s linear infinite;
+      position: absolute;
+      top: 50%;
+      left: 20px;
+      transform: translateY(-50%);
+      display: none;
+    }
+
+    @keyframes spin {
+      to {
+        transform: translateY(-50%) rotate(360deg);
+      }
+    }
+
+    .confidential {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-30deg);
+      font-size: 5rem;
+      color: rgba(255, 255, 255, 0.035);
+      font-weight: 900;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .error {
+      color: #ff4d4d;
+      font-size: 0.85rem;
+      text-align: center;
+      height: 28px;
+      margin-top: -10px;
+      margin-bottom: 15px;
+      visibility: hidden;
+    }
+
+    .error.visible {
+      visibility: visible;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <div class="confidential">CONFIDENTIAL</div>
+    <div class="header">Zero-map</div>
+    <form id="loginForm" autocomplete="off" spellcheck="false" novalidate>
+      <label for="username">USERNAME</label>
+      <input type="text" id="username" name="username" required />
+
+      <label for="password">PASSWORD</label>
+      <input type="password" id="password" name="password" required />
+
+      <p class="error" id="errorText">Access Denied: Invalid Credentials</p>
+
+      <button type="submit" id="loginButton">
+        <div class="spinner" id="spinner"></div>
+        <span id="loginText">LOGIN</span>
+      </button>
+    </form>
+  </div>
+
+  <script>
+    const form = document.getElementById('loginForm');
+    const errorText = document.getElementById('errorText');
+    const loginButton = document.getElementById('loginButton');
+    const spinner = document.getElementById('spinner');
+    const loginText = document.getElementById('loginText');
+
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      errorText.classList.remove('visible');
+      spinner.style.display = 'inline-block';
+      loginText.textContent = 'LOGGING IN...';
+      loginButton.disabled = true;
+
+      const username = form.username.value.trim();
+      const password = form.password.value.trim();
+
+      try {
+        const res = await fetch('/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+
+        if (res.ok) {
+          setTimeout(() => {
+            window.location.href = 'dashboard';
+          }, 1000);
+        } else {
+          throw new Error();
+        }
+      } catch (err) {
+        spinner.style.display = 'none';
+        loginText.textContent = 'LOGIN';
+        loginButton.disabled = false;
+        errorText.classList.add('visible');
+
+        setTimeout(() => {
+          errorText.classList.remove('visible');
+        }, 3000);
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,335 @@
+/* Container adopting #right-side theme */
+.wifi-scans-screen {
+  flex: 1 1 50%;
+  display: flex;
+  flex-direction: column;
+  height: 100%;          /* Fill parent */
+  min-height: 0;         /* Prevent flex overflow */
+  padding: 14px 30px 40px;
+  box-sizing: border-box;
+  background-color: #0a0a0a;
+  color: #e6e6e6;          /* Text color from #right-side */
+  font-family: 'Source Code Pro', monospace;
+  user-select: none;
+  overflow: hidden;       /* Prevent scrolling */
+  gap: 14px;
+}
+
+/* Section wrapper */
+.wifi-scans-section {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Headings */
+.wifi-scans-screen h2 {
+  font-size: 1.2rem;
+  margin: 0 0 8px 0;
+  color: #aaa;           /* Heading highlight consistent */
+  user-select: text;
+}
+
+/* Wi-Fi list container styled like #manual-location-container and #map */
+.wifi-networks-container {
+  flex: 1 1 auto;
+  max-height: 300px;
+  overflow-y: auto;
+  background-color: #111;     /* same as manual-location-container bg */
+  border: 1px solid #333;     /* same border as inputs */
+  border-radius: 10px;
+  padding: 12px;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.6);
+  user-select: text;
+}
+
+/* Scrollbar styling matching theme */
+.wifi-networks-container::-webkit-scrollbar {
+  width: 10px;
+}
+.wifi-networks-container::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+.wifi-networks-container::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 7px;
+  border: 3px solid #0a0a0a;
+}
+
+/* Wi-Fi networks list */
+.wifi-networks-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.9rem;
+  color: #aaa;            /* same text highlight as headings */
+}
+
+/* Individual list items */
+.wifi-networks-list li {
+  padding: 10px 14px;
+  border-bottom: 1px solid #222;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  cursor: pointer;
+  user-select: text;
+  outline: none;
+}
+
+.wifi-networks-list li:last-child {
+  border-bottom: none;
+}
+
+/* Hover effect on non-selected items */
+.wifi-networks-list li:hover:not(.selected) {
+  background-color: #151515; /* subtle hover */
+  color: #fff;            /* highlight text */
+}
+
+/* Selected item */
+.wifi-networks-list li.selected {
+  background-color: #1d1d1d; /* Indigo blue highlight */
+  color: #fff;
+}
+
+/* Buttons Wrapper */
+.wifi-scans-buttons {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Common Button Styling */
+.wifi-scans-buttons button {
+  flex: none;
+  padding: 10px 24px;
+  font-weight: bold;
+  font-size: 0.9rem;
+  border-radius: 8px;
+  background-color: #111;       /* button bg from #right-side */
+  color: #fff;                  /* button text */
+  border: 1px solid #333;       /* button border */
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease;
+  min-width: 140px;
+  font-family: 'Source Code Pro', monospace;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.wifi-scans-buttons button:hover:not(:disabled) {
+  background-color: #1d1d1d;   /* button hover bg */
+}
+
+.wifi-scans-buttons button:disabled {
+  background-color: #1b1b1b;
+  color: #7a8a96;
+  cursor: not-allowed;
+}
+
+
+
+
+/* =======================
+   Monitor Mode Modal
+   ======================= */
+
+/* Modal Background */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed;
+  z-index: 999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.75); /* Slightly darker overlay */
+}
+
+/* Modal Content Box */
+.modal-content {
+  background-color: #0a0a0a; /* Matches main app background */
+  margin: 6% auto;
+  padding: 24px;
+  border: 1px solid #222;
+  border-radius: 14px;
+  width: 480px;
+  max-height: 80%;
+  color: #e6e6e6;
+  font-family: 'Source Code Pro', monospace;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.9);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Heading */
+.modal-content h2 {
+  font-size: 1.4rem;
+  margin: 0 0 10px 0;
+  color: #cfcfcf; /* Brighter heading color */
+}
+
+/* Close Button (X) */
+.close {
+  font-size: 1.6rem;
+  font-weight: bold;
+  color: #e6e6e6;
+  cursor: pointer;
+  align-self: flex-end;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.close:hover {
+  color: #ff4d4d; /* Subtle red hover */
+  transform: scale(1.1);
+}
+
+/* Interface List Container */
+.interface-container {
+  height: 220px;               /* Slightly taller */
+  overflow-y: auto;            
+  background-color: #111;      
+  border: 1px solid #222;
+  border-radius: 10px;
+  padding: 14px;
+  box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.65);
+  flex-shrink: 0;
+}
+
+/* Scrollbar styling matching theme */
+.interface-container::-webkit-scrollbar {
+  width: 10px;
+}
+.interface-container::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+.interface-container::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 8px;
+  border: 2px solid #0a0a0a;
+}
+
+/* Interface List Items */
+#interface-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 1rem; /* Larger font for clarity */
+  color: #bcbcbc;
+}
+
+#interface-list li {
+  padding: 12px 16px; /* More padding for size */
+  margin-bottom: 8px;
+  background-color: #111;
+  border: 1px solid #222;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.25s ease, color 0.25s ease, transform 0.1s ease;
+}
+
+#interface-list li:hover:not(.selected) {
+  background-color: #1a1a1a;
+  color: #fff;
+  transform: translateY(-1px); /* Subtle lift effect */
+}
+
+#interface-list li.selected {
+  background-color: #1f1f1f;
+  color: #fff;
+}
+
+/* Modal Footer Buttons */
+.modal-footer {
+  margin-top: 18px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* Button Styling */
+.modal-footer button {
+  flex: 1;
+  padding: 12px 0;
+  font-weight: bold;
+  font-size: 1rem;
+  border-radius: 10px;
+  background-color: #111;
+  color: #fff;
+  border: 1px solid #222;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  font-family: 'Source Code Pro', monospace;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.modal-footer button:hover:not(:disabled) {
+  background-color: #1d1d1d;
+  transform: translateY(-1px);
+}
+
+.modal-footer button:disabled {
+  background-color: #1b1b1b;
+  color: #7a8a96;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Action Container */
+.action-container {
+  height: 220px; /* Match interface container height */
+  overflow-y: auto;
+  background-color: #111;
+  border: 1px solid #222;
+  border-radius: 10px;
+  padding: 14px;
+  box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.65);
+  flex-shrink: 0;
+}
+
+/* Action List Items */
+#action-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 1rem;
+  color: #bcbcbc;
+}
+
+#action-list li {
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  background-color: #111;
+  border: 1px solid #222;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.25s ease, color 0.25s ease, transform 0.1s ease;
+}
+
+#action-list li:hover:not(.selected) {
+  background-color: #1a1a1a;
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+#action-list li.selected {
+  background-color: #1f1f1f;
+  color: #fff;
+}
+
+.action-item.disabled {
+  opacity: 0.5;                /* Faded look */
+  cursor: not-allowed;         /* Show not-allowed cursor */
+  pointer-events: none;        /* Prevent clicking */
+}

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Zero-Map</title>
+
+  <!-- Load Google Maps JS API -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD2zkRdRBEGT96vEZjqBz2VjQ6G1hHbB9E&callback=initMap"
+    async defer></script>
+
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/left-side.css" />
+  <link rel="stylesheet" href="css/right-side.css" />
+  <link rel="stylesheet" href="css/mode-switcher.css" />
+  <link rel="stylesheet" href="css/wifi-scan.css" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+
+<body>
+
+  <!-- Menu toggle button -->
+  <button id="menu-toggle" class="menu-toggle" aria-label="Open sidebar menu" aria-controls="adapter-list"
+    aria-expanded="false">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#e0e2ff" stroke-width="3" stroke-linecap="round"
+      stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <line x1="3" y1="6" x2="21" y2="6" />
+      <line x1="3" y1="12" x2="21" y2="12" />
+      <line x1="3" y1="18" x2="21" y2="18" />
+    </svg>
+  </button>
+
+  <!-- Vertical divider -->
+  <div id="vertical-divider"></div>
+
+  <div id="app-container">
+
+    <!-- Background Left Section -->
+    <section id="attack-menu-left-section" aria-hidden="true">
+      <div class="menu-content">
+        <h2>Zero-Map</h2>
+        <button type="button" class="mode-btn active" data-mode="wifi-radar">Wi-Fi Radar</button>
+        <button type="button" class="mode-btn" data-mode="wifi-scans">Wi-Fi Scans</button>
+        <button type="button" class="mode-btn" data-mode="attacks">Attacks</button>
+      </div>
+    </section>
+
+    <!-- Left Sidebar -->
+    <aside id="adapter-list" role="region" aria-label="Wi-Fi Adapter Selection" tabindex="-1">
+      <button id="close-sidebar-btn" aria-label="Close sidebar">&times;</button>
+
+      <h3>Select Wi-Fi Adapter</h3>
+
+      <section id="refresh-adapter-section">
+        <button id="refresh-adapters-btn" aria-label="Refresh Wi-Fi adapters list" type="button">
+          <svg class="icon-refresh" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 4V1L8 5l4 4V6a6 6 0 1 1-6 6H4a8 8 0 1 0 8-8z" />
+          </svg>
+          Refresh Adapters
+          <span class="spinner" aria-hidden="true"></span>
+        </button>
+      </section>
+
+      <section id="adapters" tabindex="0" aria-live="polite" aria-relevant="additions">
+        <!-- Adapter items injected dynamically -->
+      </section>
+
+      <section id="info" aria-live="polite" aria-atomic="true" tabindex="0">
+        Select an adapter to view details and radar map.
+      </section>
+    </aside>
+
+    <!-- Right Side -->
+    <main id="right-side" style="width: 100%; transition: none;">
+
+      <!-- Wi-Fi Radar Screen -->
+      <div id="wifi-radar-screen" class="mode-screen active">
+        <section id="manual-location-container" style="margin-bottom: 16px;">
+          <label for="latitude">Latitude:</label>
+          <input type="number" step="any" id="latitude" placeholder="e.g. 37.7749" />
+          <label for="longitude">Longitude:</label>
+          <input type="number" step="any" id="longitude" placeholder="e.g. -122.4194" />
+          <button id="search-location-btn" type="button">Search Location</button>
+          <input type="text" id="gmap-link" placeholder="Paste Google Maps link here" />
+          <button id="parse-gmap-link-btn" type="button">Extract from Link</button>
+        </section>
+
+        <section id="location-controls" style="display: flex; gap: 10px; margin-bottom: 16px;">
+          <button id="refresh-location-btn" type="button" disabled>
+            <svg class="icon-refresh" viewBox="0 0 24 24">
+              <path d="M12 4V1L8 5l4 4V6a6 6 0 1 1-6 6H4a8 8 0 1 0 8-8z" />
+            </svg>
+            Refresh Location
+            <span class="spinner"></span>
+          </button>
+          <button id="use-location-btn" type="button">
+            <svg class="icon-location" viewBox="0 0 24 24" width="18" height="18" fill="#e0e2ff">
+              <path
+                d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z" />
+            </svg>
+            Use My Location
+          </button>
+        </section>
+
+        <section id="map" style="height: 100%; min-height: 300px;">
+          <!-- Google Map will render here -->
+        </section>
+      </div>
+
+      <!-- Wi-Fi Scans Screen -->
+      <div id="wifi-scans-screen" class="mode-screen wifi-scans-screen" style="display: none;">
+        <section class="wifi-scans-section">
+          <h2>Nearby Wi-Fi Networks</h2>
+          <p>List of detected Wi-Fi networks from the Python scanner.</p>
+
+          <div class="wifi-networks-container">
+            <ul id="wifi-networks-list" class="wifi-networks-list" role="listbox" tabindex="0">
+              <!-- Networks populated dynamically -->
+            </ul>
+          </div>
+
+          <div class="wifi-scans-buttons">
+            <button id="refresh-wifi-scans-btn" type="button">
+              Search for Wi-Fi
+            </button>
+            <button id="monitor-mode-btn" type="button">
+              Interface List
+            </button>
+            <button id="select-wifi-btn" type="button" disabled>
+              Select Network
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <!-- Attacks Screen -->
+      <div id="attacks-screen" class="mode-screen">
+        <section style="padding: 20px; color: #e0e2ff;">
+          <h2>Attacks Panel</h2>
+          <p>This is the Attacks window. Replace this content with your attack controls.</p>
+          <button>Run Attack</button>
+          <button>Stop Attack</button>
+        </section>
+      </div>
+
+    </main>
+  </div>
+
+<!-- Monitor Mode Modal -->
+<div id="monitor-mode-modal" class="modal">
+  <div class="modal-content">
+    <!-- Close Button (X) -->
+    <span id="monitor-mode-close-btn" class="close">&times;</span>
+
+    <!-- Step 1: Interface Selection -->
+    <div id="step-1">
+      <h2>Select Wi-Fi Interface</h2>
+      <div class="interface-container">
+        <ul id="interface-list">
+          <li>Loading interfaces...</li>
+          <!-- Dynamic items will be injected here -->
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button id="cancel-btn" class="cancel-btn">Cancel</button>
+        <button id="next-btn" class="next-btn" disabled>Next</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Monitor Mode Options -->
+    <div id="step-2" style="display: none;">
+      <h2>Select Action</h2>
+      <div class="action-container">
+        <ul id="action-list">
+          <li data-action="start" class="action-item">Start Monitor Mode</li>
+          <li data-action="stop" class="action-item">Stop Monitor Mode</li>
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button id="back-btn" class="cancel-btn">Back</button>
+        <button id="apply-btn" class="next-btn" disabled>Apply</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+  <!-- Load JavaScript Modules -->
+  <script type="module" src="js/app.js"></script>
+  <script type="module" src="js/ui/sidebar-toggle.js"></script>
+  <script type="module" src="js/ui/mode-switcher.js"></script>
+  <script type="module" src="js/monitor-mode.js"></script>
+
+</body>
+
+</html>

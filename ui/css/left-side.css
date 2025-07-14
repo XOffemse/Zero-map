@@ -1,0 +1,255 @@
+
+/* Sidebar Container */
+#adapter-list {
+  top: 0;
+  left: 0;
+  width: 320px;
+  height: 100vh;
+  padding: 20px 12px;
+  background: #0a0a0a; /* FBI login background */
+  border-right: 1px solid #222;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  box-sizing: border-box;
+  user-select: none;
+  font-family: 'Source Code Pro', monospace;
+  color: #e6e6e6;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease-in-out;
+  z-index: 1500;
+}
+.menu-toggle {
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  z-index: 1000; /* Less than sidebar z-index */
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+body.sidebar-open .menu-toggle {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Close Sidebar Button */
+#close-sidebar-btn {
+  background: transparent;
+  border: none;
+  color: #e0e2ff;
+  font-size: 32px;
+  cursor: pointer;
+  position: absolute;
+  top: 14px;
+  right: 10px;
+  line-height: 1;
+  padding: 0;
+}
+
+/* Sidebar Header */
+#adapter-list h3 {
+  margin-top: 0;
+  margin-right: 80px;
+  margin-bottom: 16px;
+  font: 900 1.1rem 'Source Code Pro', monospace;
+  color: #ccc;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid #333;
+  padding-bottom: 10px;
+  text-align: center;
+}
+
+/* Refresh Adapter Button Section */
+#refresh-adapter-section {
+  margin-bottom: 10px;
+}
+
+/* Refresh Button */
+#refresh-adapters-btn {
+  width: 100%;
+  padding: 10px 24px;
+  font-weight: bold;
+  font-size: 0.9rem;
+  border-radius: 8px;
+  background-color: #111;
+  color: #fff;
+  border: 1px solid #333;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 140px;
+  box-sizing: border-box;
+  font-family: 'Source Code Pro', monospace;
+  letter-spacing: 2px;
+}
+
+#refresh-adapters-btn:hover:not(:disabled) {
+  background-color: #1d1d1d;
+}
+
+#refresh-adapters-btn:active:not(:disabled) {
+  background-color: #0b0b0b;
+}
+
+#refresh-adapters-btn:disabled {
+  background-color: #1b1b1b;
+  color: #7a8a96;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Refresh Spinner */
+#refresh-adapters-btn .spinner {
+  width: 14px;
+  height: 14px;
+  border: 2.5px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-left: 6px;
+  flex-shrink: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease;
+}
+
+#refresh-adapters-btn.loading .spinner {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Refresh Icon */
+#refresh-adapters-btn .icon-refresh {
+  width: 16px;
+  height: 16px;
+  fill: #ffffff;
+  flex-shrink: 0;
+  transition: opacity 0.2s ease;
+}
+
+#refresh-adapters-btn.loading .icon-refresh {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* Spinner Keyframes */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Adapter List Container */
+#adapters {
+  margin-top: 10px;
+  flex-grow: 1;
+  background: #111;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  padding: 10px 0;
+  box-shadow: inset 0 0 14px rgba(0, 0, 0, 0.6);
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+/* Scrollbar Styling */
+#adapters::-webkit-scrollbar {
+  width: 10px;
+}
+#adapters::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+#adapters::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 7px;
+  border: 3px solid #0a0a0a;
+}
+
+/* Adapter Items */
+.adapter-item {
+  height: 72px;
+  padding: 16px 24px 16px 28px;
+  border-bottom: 1.5px solid #333;
+  color: #e0e0e0;
+  border-radius: 8px 8px 0 0;
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: transparent;
+  font-weight: 600;
+  transition: background 0.2s ease, color 0.2s ease;
+  line-height: 1.4;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.adapter-item:hover {
+  background: #151515;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(255, 255, 255, 0.04);
+}
+
+.adapter-item.selected {
+  background: #1d1d1d;
+  color: #ffffff;
+}
+
+.adapter-item.selected::before {
+  content: "";
+  position: absolute;
+  top: 12px;
+  left: 16px;
+  width: 4px;
+  height: calc(100% - 24px);
+  background-color: #333;
+  border-radius: 6px;
+  z-index: 1;
+}
+
+/* SSID Info */
+.adapter-ssid {
+  font-size: 0.9rem;
+  color: #999;
+  margin-top: 5px;
+}
+
+/* Info Panel */
+#info {
+  background: #111;
+  padding: 20px;
+  height: 170px;
+  width: 100%;
+  border-radius: 14px;
+  font-size: 1.05rem;
+  line-height: 1.5;
+  color: #e6e6e6;
+  box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.6);
+  user-select: text;
+  box-sizing: border-box;
+  overflow: auto;
+  white-space: normal;
+  word-wrap: break-word;
+  flex-shrink: 0;
+  margin-top: 10px;
+}
+
+#info::-webkit-scrollbar {
+  display: none;
+}
+#info {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

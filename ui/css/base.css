@@ -1,0 +1,63 @@
+/* ============================================
+   Global Styles
+============================================ */
+
+/* Box sizing globally */
+*, *::before, *::after {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent; /* Remove tap highlight (mobile) */
+}
+
+/* Remove text selection highlighting */
+* {
+  user-select: none;            /* Prevent user text selection */
+  -webkit-user-select: none;    /* Safari/Chrome */
+  -moz-user-select: none;       /* Firefox */
+  -ms-user-select: none;        /* IE/Edge */
+}
+
+/* Remove focus outline (yellow glow in Linux browsers) */
+*:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Base */
+html {
+  height: 100%;
+}
+body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  font-family: 'Source Code Pro', monospace;
+  background-color: #000000; /* FBI black */
+  color: #e6e6e6;
+  overflow: hidden; /* Prevent scrollbars */
+  user-select: none;
+  -webkit-user-drag: none; /* Disable drag highlight */
+}
+
+/* ============================================
+   Layout
+============================================ */
+
+/* Container flex row */
+#app-container {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+  width: 100%;
+  background-color: #0a0a0a; /* Dark container background */
+}
+
+
+
+
+
+
+
+
+
+
+
