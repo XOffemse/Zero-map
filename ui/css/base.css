@@ -61,3 +61,105 @@ body {
 
 
 
+
+
+
+/* Root Password Modal */
+#root-password-modal {
+  display: none; /* Hidden by default */
+  position: fixed;
+  z-index: 9999; /* Make sure it's on top */
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.5); /* Black semi-transparent background */
+}
+
+/* Modal Content Box */
+#root-password-modal .modal-content {
+  background-color: #1e1e1e;
+  margin: 10% auto;
+  padding: 20px;
+  border: 1px solid #333;
+  width: 400px;
+  max-width: 90%;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+  color: #f1f1f1;
+}
+
+/* Close Button (X) */
+#root-password-close-btn {
+  color: #aaa;
+  float: right;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+#root-password-close-btn:hover {
+  color: #f44336; /* Red on hover */
+}
+
+/* Input Group */
+#root-password-modal .input-group {
+  margin: 15px 0;
+}
+
+#root-password-modal input[type="password"] {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #555;
+  border-radius: 4px;
+  background: #2b2b2b;
+  color: #f1f1f1;
+}
+
+#root-password-modal input[type="password"]:focus {
+  outline: none;
+  border-color: #66afe9;
+  box-shadow: 0 0 5px #66afe9;
+}
+
+/* Buttons */
+#root-password-modal .modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+#root-password-modal button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#root-password-modal .next-btn {
+  background-color: #4caf50;
+  color: white;
+}
+
+#root-password-modal .next-btn:hover {
+  background-color: #45a049;
+}
+
+#root-password-modal .cancel-btn {
+  background-color: #f44336;
+  color: white;
+}
+
+#root-password-modal .cancel-btn:hover {
+  background-color: #d32f2f;
+}
+
+
+
+
+
+
+
+

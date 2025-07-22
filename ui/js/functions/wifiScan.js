@@ -1,10 +1,9 @@
-// wifiScan.js
-
 // ================================
 // Global Variables
 // ================================
 let nearbyMarkers = []; // Track nearby network markers
 let selectedWifiNetwork = null;
+let currentSelectedAdapter = null; // 🆕 Track the selected adapter globally
 
 // ================================
 // Utility Functions
@@ -22,9 +21,38 @@ async function safeApiCall(method, ...args) {
 }
 
 // ================================
+// Adapter Selection Helper 🆕
+// ================================
+function ensureAdapterSelected() {
+  if (!currentSelectedAdapter) {
+    console.warn("No adapter selected in wifiscans.js");
+    alert("Please select a Wi-Fi adapter first.");
+    document.getElementById('adapter-list')?.classList.add('open'); // Open sidebar
+    return false;
+  }
+  return true;
+}
+
+// Called from adapterMap.js when user selects an adapter
+function setSelectedAdapter(adapter) {
+  if (typeof adapter === 'object') {
+    // If full adapter object is passed, extract the interface
+    currentSelectedAdapter = adapter.interface || null;
+    console.log("Adapter object received in wifiscans.js:", adapter);
+  } else {
+    // If only interface name is passed
+    currentSelectedAdapter = adapter;
+    console.log("Adapter interface set in wifiscans.js:", adapter);
+  }
+}
+window.setSelectedAdapter = setSelectedAdapter; // 🆕 Expose globally
+
+// ================================
 // Scan Nearby Wi-Fi
 // ================================
 async function scanNearbyWifi() {
+  if (!ensureAdapterSelected()) return;
+
   const scanBtn = document.getElementById('scan-nearby-btn');
   if (!scanBtn) {
     console.error("Scan Nearby button not found.");
@@ -35,28 +63,23 @@ async function scanNearbyWifi() {
   scanBtn.textContent = "Scanning...";
 
   try {
-    const wifiJson = await safeApiCall('scanNearbyNetworks');
+    const wifiJson = await safeApiCall('scanNearbyNetworks', currentSelectedAdapter); // 🆕 Pass adapter
     const networks = JSON.parse(wifiJson);
 
+    // Clear existing markers
     nearbyMarkers.forEach(marker => marker.setMap && marker.setMap(null));
     nearbyMarkers = [];
 
     if (!networks.length) {
       alert('No nearby Wi-Fi networks found.');
     } else {
-      // Optionally add markers on map here if needed
+      console.log(`Found ${networks.length} networks.`);
     }
 
     await refreshWifiScans();
 
     // Switch to Wi-Fi Scans screen
-    document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
-    const scansBtn = document.querySelector('.mode-btn[data-mode="wifi-scans"]');
-    if (scansBtn) scansBtn.classList.add('active');
-
-    document.querySelectorAll('.mode-screen').forEach(screen => (screen.style.display = 'none'));
-    const scansScreen = document.getElementById('wifi-scans-screen');
-    if (scansScreen) scansScreen.style.display = 'block';
+    switchToScreen('wifi-scans');
 
   } catch (error) {
     alert("Failed to scan nearby networks.");
@@ -71,6 +94,8 @@ async function scanNearbyWifi() {
 // Refresh Wi-Fi Scan List
 // ================================
 async function refreshWifiScans() {
+  if (!ensureAdapterSelected()) return;
+
   const listEl = document.getElementById('wifi-networks-list');
   if (!listEl) {
     console.error("Wi-Fi networks list element not found.");
@@ -78,14 +103,13 @@ async function refreshWifiScans() {
   }
 
   listEl.innerHTML = '<li>Scanning for Wi-Fi networks...</li>';
-
   selectedWifiNetwork = null;
 
   const selectBtn = document.getElementById('select-wifi-btn');
   if (selectBtn) selectBtn.disabled = true;
 
   try {
-    const wifiJson = await safeApiCall('scanNearbyNetworks');
+    const wifiJson = await safeApiCall('scanNearbyNetworks', currentSelectedAdapter); // 🆕 Pass adapter
     const networks = JSON.parse(wifiJson);
 
     if (!networks.length) {
@@ -141,6 +165,19 @@ async function refreshWifiScans() {
 }
 
 // ================================
+// Switch Between Screens
+// ================================
+function switchToScreen(screenName) {
+  document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+  const btn = document.querySelector(`.mode-btn[data-mode="${screenName}"]`);
+  if (btn) btn.classList.add('active');
+
+  document.querySelectorAll('.mode-screen').forEach(screen => (screen.style.display = 'none'));
+  const targetScreen = document.getElementById(`${screenName}-screen`);
+  if (targetScreen) targetScreen.style.display = 'block';
+}
+
+// ================================
 // Setup Event Listeners after DOM is ready
 // ================================
 document.addEventListener('DOMContentLoaded', () => {
@@ -165,13 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
       }
 
-      document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
-      const attacksBtn = document.querySelector('.mode-btn[data-mode="attacks"]');
-      if (attacksBtn) attacksBtn.classList.add('active');
-
-      document.querySelectorAll('.mode-screen').forEach(screen => (screen.style.display = 'none'));
-      const attacksScreen = document.getElementById('attacks-screen');
-      if (attacksScreen) attacksScreen.style.display = 'block';
+      switchToScreen('attacks');
     });
   }
 

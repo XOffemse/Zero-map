@@ -2,9 +2,16 @@ import webview
 import json
 import os
 import threading
+import platform
 from flask import Flask, request, jsonify, send_from_directory
 from adapter_utils import get_adapters
-from adapter_utils.wifi_scanner import scan_wifi_networks  # Import your scanner function
+
+# Dynamically import the correct Wi-Fi scanner based on OS
+if platform.system() == "Windows":
+    from adapter_utils.windows.wifi_scan_windows import scan_wifi_networks
+else:
+    from adapter_utils.linux.wifi_scan_linux import scan_wifi_networks
+
 from adapter_utils.linux.monitor_mode_api import MonitorModeAPI
 
 # === Flask Setup ===
@@ -41,10 +48,10 @@ class API:
             print("[API] Error in adapterSelected:", e)
             return "Error"
 
-    def scanNearbyNetworks(self):
+    def scanNearbyNetworks(self, adapter_interface):
         """Scan for nearby Wi-Fi networks"""
         try:
-            networks = scan_wifi_networks()
+            networks = scan_wifi_networks(interface_name=adapter_interface)  # <-- FIX: pass adapter
             return json.dumps(networks)
         except Exception as e:
             print("[API] Error scanning networks:", e)
@@ -105,6 +112,7 @@ def login():
 def serve_static(path):
     """Serve static files from ui directory"""
     return send_from_directory('ui', path)
+
 
 # === WebView Launcher ===
 def start_flask():

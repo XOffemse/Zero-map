@@ -20,6 +20,8 @@ const applyBtn = document.getElementById('apply-btn');
 const step1El = document.getElementById('step-1');
 const step2El = document.getElementById('step-2');
 const actionListEl = document.getElementById('action-list');
+const passwordContainer = document.getElementById('password-container');
+const sudoPasswordInput = document.getElementById('sudo-password');
 
 // Reference Stop Monitor Mode item
 const stopMonitorItem = actionListEl.querySelector('li[data-action="stop"]');
@@ -58,6 +60,10 @@ function resetModal() {
     // Clear selected states
     document.querySelectorAll('#interface-list li').forEach(li => li.classList.remove('selected'));
     document.querySelectorAll('#action-list li').forEach(li => li.classList.remove('selected'));
+
+    // 🆕 Clear and hide password input
+    passwordContainer.style.display = 'none';
+    sudoPasswordInput.value = '';
 
     // Update Stop Monitor Mode availability
     updateStopMonitorState();
@@ -138,10 +144,18 @@ applyBtn.addEventListener('click', async () => {
         console.log(`Applying action: ${modalSelectedAction} on adapter:`, modalSelectedAdapter);
 
         try {
+            const sudoPassword = sudoPasswordInput.value.trim();
+            if (!sudoPassword) {
+                alert("Please enter your root password to proceed.");
+                return;
+            }
+
             await modalSafeApiCall('monitorModeAction', JSON.stringify({
                 adapter: modalSelectedAdapter,
-                action: modalSelectedAction
+                action: modalSelectedAction,
+                password: sudoPassword // 🆕 Send password
             }));
+
             console.log("Monitor Mode action applied successfully.");
 
             // Update state after applying action
@@ -225,6 +239,11 @@ actionListEl.addEventListener('click', (e) => {
         e.target.classList.add('selected');
         modalSelectedAction = e.target.getAttribute('data-action');
         console.log("[Monitor Modal] Selected action:", modalSelectedAction);
+
+        // 🆕 Show password input
+        passwordContainer.style.display = 'block';
+        sudoPasswordInput.value = ''; // Clear any previously entered password
+
         applyBtn.disabled = false;
     }
 });

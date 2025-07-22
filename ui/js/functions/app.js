@@ -1,4 +1,4 @@
-// adapterMap.js
+// app.js
 
 // ================================
 // Global Variables
@@ -108,6 +108,11 @@ function renderAdaptersList() {
 async function selectAdapter(index) {
     selectedAdapter = adapters[index];
     if (!selectedAdapter) return;
+
+    if (window.setSelectedAdapter) {
+        // Send the adapter interface name to wifiscans.js
+        window.setSelectedAdapter(selectedAdapter.interface);
+    }
 
     highlightSelectedAdapter(index);
     updateAdapterInfo(selectedAdapter);
