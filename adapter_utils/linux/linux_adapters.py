@@ -7,9 +7,9 @@ from adapter_utils.common import estimate_range_from_signal
 # ================================
 # Global State
 # ================================
-current_selected_adapter = None  # 🆕 Track selected adapter
+current_selected_adapter = None  # Track selected adapter
 
-# Precompiled regex patterns for efficiency
+# Precompiled regex patterns
 LSUSB_PATTERN = re.compile(r"Bus \d+ Device \d+: ID ([\da-f]{4}:[\da-f]{4}) (.+)")
 LSPCI_PATTERN = re.compile(r".*Network controller \[.*\]: (.+?) \[.*\]")
 DRIVER_PATTERN = re.compile(r"driver:\s*(\w+)")
@@ -17,12 +17,11 @@ SSID_PATTERN = re.compile(r"SSID: (.+)")
 MAC_PATTERN = re.compile(r"Connected to ([\da-fA-F:]{17})")
 SIGNAL_PATTERN = re.compile(r"signal: (-?\d+) dBm")
 
-
 # ================================
 # Utility Functions
 # ================================
 def get_usb_devices():
-    """Fetch connected USB devices and descriptions"""
+    """Fetch connected USB devices and descriptions."""
     usb_devices = {}
     try:
         lsusb_output = subprocess.check_output(["lsusb"]).decode("utf-8", errors="ignore")
@@ -37,7 +36,7 @@ def get_usb_devices():
 
 
 def get_pci_devices():
-    """Fetch PCI network controllers"""
+    """Fetch PCI network controllers."""
     pci_devices = {}
     try:
         lspci_output = subprocess.check_output(["lspci", "-nn"]).decode("utf-8", errors="ignore")
@@ -52,7 +51,7 @@ def get_pci_devices():
 
 
 def get_driver_name(device):
-    """Fetch driver name for a device"""
+    """Fetch driver name for a device."""
     try:
         output = subprocess.check_output(["ethtool", "-i", device]).decode("utf-8", errors="ignore")
         match = DRIVER_PATTERN.search(output)
@@ -62,26 +61,35 @@ def get_driver_name(device):
 
 
 def get_wifi_device_description(device, driver_name, usb_devices, pci_devices):
-    """Try to get a human-readable description of a Wi-Fi device"""
-    # Check USB devices
+    """Get a clean, human-readable Wi-Fi adapter name."""
     try:
-        for usb_desc in usb_devices.values():
-            if driver_name and driver_name.lower() in usb_desc.lower():
-                return usb_desc
-    except Exception:
+        # First, try nmcli for vendor info
+        nmcli_output = subprocess.check_output(
+            ["nmcli", "-f", "GENERAL.VENDOR", "device", "show", device]
+        ).decode("utf-8", errors="ignore")
+        vendor_line = next((line for line in nmcli_output.splitlines() if "GENERAL.VENDOR" in line), None)
+        if vendor_line:
+            vendor = vendor_line.split(":", 1)[1].strip()
+            if vendor and vendor.lower() != "unknown":
+                return f"{vendor} ({device})"
+    except subprocess.CalledProcessError:
         pass
 
-    # Check PCI devices
+    # Try USB devices match
+    for usb_desc in usb_devices.values():
+        if driver_name and driver_name.lower() in usb_desc.lower():
+            return f"{usb_desc} ({device})"
+
+    # Try PCI devices match
     for pci_name in pci_devices:
         if driver_name and driver_name.lower() in pci_name.lower():
-            return pci_name
+            return f"{pci_name} ({device})"
 
-    # Fallback to driver or device name
-    return driver_name or device
-
+    # Fallback to driver or raw device name
+    return f"{driver_name or device} ({device})"
 
 def get_adapters_linux():
-    """Returns a list of Wi-Fi adapters and their connection info on Linux"""
+    """Returns a list of Wi-Fi adapters and their connection info on Linux."""
     adapters = []
     usb_devices = get_usb_devices()
     pci_devices = get_pci_devices()
@@ -112,7 +120,7 @@ def get_adapters_linux():
                             mac = mac_match.group(1).strip()
                         if signal_match := SIGNAL_PATTERN.search(iw_output):
                             dbm = int(signal_match.group(1))
-                            signal = min(max(2 * (dbm + 100), 0), 100)  # Convert dBm to %
+                            signal = min(max(2 * (dbm + 100), 0), 100)
                 except subprocess.CalledProcessError:
                     pass
 
@@ -129,47 +137,22 @@ def get_adapters_linux():
 
     return adapters
 
-
 # ================================
 # API for JavaScript
 # ================================
 class Api:
     def getAdapters(self):
-        """Returns a JSON string of available Wi-Fi adapters"""
+        """Return list of adapters as JSON."""
         adapters = get_adapters_linux()
         return json.dumps(adapters)
 
     def adapterSelected(self, adapter_json):
-        """Called by JS when user selects an adapter"""
+        """Store selected adapter from frontend."""
         global current_selected_adapter
         adapter = json.loads(adapter_json)
         current_selected_adapter = adapter.get("interface")
         print(f"[INFO] Adapter selected: {current_selected_adapter}")
         return "OK"
-
-    def scanNearbyNetworks(self, adapter_interface):
-        """Perform Wi-Fi scan on the selected adapter"""
-        try:
-            cmd = ["nmcli", "-t", "-f", "SSID,BSSID,SIGNAL,FREQ,SECURITY", "dev", "wifi", "list", "ifname", adapter_interface]
-            output = subprocess.check_output(cmd).decode("utf-8", errors="ignore")
-            networks = []
-            for line in output.strip().splitlines():
-                parts = line.split(":")
-                if len(parts) < 5:
-                    continue
-                ssid, bssid, signal, freq, auth = parts
-                networks.append({
-                    "ssid": ssid,
-                    "bssid": bssid,
-                    "signal": signal,
-                    "freq": freq,
-                    "auth": auth
-                })
-            return json.dumps(networks)
-        except subprocess.CalledProcessError as e:
-            print(f"[ERROR] Failed to scan: {e}")
-            return json.dumps([])
-
 
 # ================================
 # Main App Launcher

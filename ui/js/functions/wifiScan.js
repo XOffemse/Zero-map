@@ -54,115 +54,126 @@ async function scanNearbyWifi() {
   if (!ensureAdapterSelected()) return;
 
   const scanBtn = document.getElementById('scan-nearby-btn');
-  if (!scanBtn) {
-    console.error("Scan Nearby button not found.");
-    return;
-  }
+  const statusEl = document.getElementById('wifi-scan-status'); 
 
   scanBtn.disabled = true;
   scanBtn.textContent = "Scanning...";
+  if (statusEl) statusEl.textContent = "Scanning Wi-Fi networks..."; // ⚡ Show scanning message
 
   try {
-    const wifiJson = await safeApiCall('scanNearbyNetworks', currentSelectedAdapter); // 🆕 Pass adapter
+    const wifiJson = await safeApiCall('scanNearbyNetworks', currentSelectedAdapter);
     const networks = JSON.parse(wifiJson);
 
-    // Clear existing markers
-    nearbyMarkers.forEach(marker => marker.setMap && marker.setMap(null));
+    // Get map from app.js
+    const map = window.getMap();
+    if (!map) {
+      console.error("Map is not initialized in app.js");
+      return;
+    }
+
+    // Clear old markers
+    nearbyMarkers.forEach(marker => marker.setMap(null));
     nearbyMarkers = [];
 
     if (!networks.length) {
       alert('No nearby Wi-Fi networks found.');
-    } else {
-      console.log(`Found ${networks.length} networks.`);
+      return;
     }
 
-    await refreshWifiScans();
+    networks.forEach(net => {
+      if (!net.location || !net.location.lat || !net.location.lon) return;
 
-    // Switch to Wi-Fi Scans screen
-    switchToScreen('wifi-scans');
+      const marker = new google.maps.Marker({
+        position: { lat: net.location.lat, lng: net.location.lon },
+        map: map,
+        title: net.ssid || 'Hidden SSID'
+      });
 
-  } catch (error) {
-    alert("Failed to scan nearby networks.");
-    console.error(error);
+      const infowindow = new google.maps.InfoWindow({
+        content: `<strong>${net.ssid || 'Hidden SSID'}</strong><br/>BSSID: ${net.bssid}<br/>Signal: ${net.signal}%`
+      });
+
+      marker.addListener('click', () => infowindow.open(map, marker));
+      nearbyMarkers.push(marker);
+    });
+
+    // Center map on the first network
+    if (networks[0].location) {
+      map.setCenter({ lat: networks[0].location.lat, lng: networks[0].location.lon });
+      map.setZoom(15);
+    }
+
+    // Update the Wi-Fi list without switching screens
+    await refreshWifiScans(networks);
+
+  } catch (err) {
+    console.error(err);
+    alert("Failed to scan Wi-Fi networks");
   } finally {
     scanBtn.disabled = false;
     scanBtn.textContent = "Search for Wi-Fi";
+    if (statusEl) statusEl.textContent = ""; // Clear scanning message
   }
 }
+
 
 // ================================
 // Refresh Wi-Fi Scan List
 // ================================
-async function refreshWifiScans() {
+async function refreshWifiScans(networks) {
   if (!ensureAdapterSelected()) return;
 
   const listEl = document.getElementById('wifi-networks-list');
-  if (!listEl) {
-    console.error("Wi-Fi networks list element not found.");
-    return;
-  }
+  if (!listEl) return;
 
-  listEl.innerHTML = '<li>Scanning for Wi-Fi networks...</li>';
+  listEl.innerHTML = '';
   selectedWifiNetwork = null;
 
   const selectBtn = document.getElementById('select-wifi-btn');
   if (selectBtn) selectBtn.disabled = true;
 
-  try {
-    const wifiJson = await safeApiCall('scanNearbyNetworks', currentSelectedAdapter); // 🆕 Pass adapter
-    const networks = JSON.parse(wifiJson);
+  if (!networks || !networks.length) {
+    listEl.innerHTML = '<li>No Wi-Fi networks found.</li>';
+    return;
+  }
 
-    if (!networks.length) {
-      listEl.innerHTML = '<li>No Wi-Fi networks found.</li>';
-      return;
-    }
+  networks.forEach(net => {
+    const li = document.createElement('li');
+    li.style.padding = '8px 5px';
+    li.style.borderBottom = '1px solid #444';
+    li.tabIndex = 0;
+    li.role = 'option';
 
-    listEl.innerHTML = '';
+    const ssid = net.ssid || "<i>Hidden SSID</i>";
+    const bssid = net.bssid || "N/A";
+    const signal = net.signal !== undefined ? net.signal + "%" : "N/A";
+    const freq = net.freq || "N/A";
+    const auth = net.auth || "N/A";
 
-    networks.forEach(net => {
-      const li = document.createElement('li');
-      li.style.padding = '8px 5px';
-      li.style.borderBottom = '1px solid #444';
-      li.tabIndex = 0;
-      li.role = 'option';
-      li.classList.remove('selected');
+    li.innerHTML = `<strong>SSID:</strong> ${ssid}<br/>
+                    <strong>BSSID:</strong> ${bssid}<br/>
+                    <strong>Signal:</strong> ${signal}<br/>
+                    <strong>Frequency:</strong> ${freq} MHz<br/>
+                    <strong>Auth:</strong> ${auth}`;
 
-      const ssid = net.ssid || "<i>Hidden SSID</i>";
-      const bssid = net.bssid || "N/A";
-      const signal = net.signal !== undefined ? net.signal + "%" : "N/A";
-      const freq = net.freq || "N/A";
-      const auth = net.auth || "N/A";
-
-      li.innerHTML = `<strong>SSID:</strong> ${ssid}<br/>
-                      <strong>BSSID:</strong> ${bssid}<br/>
-                      <strong>Signal:</strong> ${signal}<br/>
-                      <strong>Frequency:</strong> ${freq} MHz<br/>
-                      <strong>Auth:</strong> ${auth}`;
-
-      li.addEventListener('click', () => {
-        if (selectedWifiNetwork) {
-          selectedWifiNetwork.classList.remove('selected');
-        }
-        selectedWifiNetwork = li;
-        li.classList.add('selected');
-        if (selectBtn) selectBtn.disabled = false;
-      });
-
-      li.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          li.click();
-        }
-      });
-
-      listEl.appendChild(li);
+    li.addEventListener('click', () => {
+      if (selectedWifiNetwork) selectedWifiNetwork.classList.remove('selected');
+      selectedWifiNetwork = li;
+      li.classList.add('selected');
+      if (selectBtn) selectBtn.disabled = false;
     });
 
-  } catch (error) {
-    listEl.innerHTML = '<li>Error scanning networks.</li>';
-    console.error("Wi-Fi scan error:", error);
-  }
+    li.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        li.click();
+      }
+    });
+
+    listEl.appendChild(li);
+  });
 }
+
 
 // ================================
 // Switch Between Screens
@@ -206,9 +217,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // ⚡ Here is the change: refresh button triggers a full Wi-Fi rescan
   const refreshBtn = document.getElementById('refresh-wifi-scans-btn');
   if (refreshBtn) {
-    refreshBtn.addEventListener('click', refreshWifiScans);
+    refreshBtn.addEventListener('click', scanNearbyWifi);
   }
 
   const scanBtn = document.getElementById('scan-nearby-btn');

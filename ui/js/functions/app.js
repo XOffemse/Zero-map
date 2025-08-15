@@ -356,3 +356,5 @@ function setUseLocationButtonState(enabled) {
     btn.disabled = !enabled;
     btn.classList.toggle('loading', !enabled);
 }
+
+window.getMap = () => map; // 🆕 Expose the map globally
